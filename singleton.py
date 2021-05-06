@@ -11,13 +11,14 @@ class Singleton:
 
     def __init__(self):
         self.connection = None
+        self.cursor = None
 
     def connect(self):
         print(self.connection)
         if self.connection is None:
             self.connection = sqlite3.connect("db.sqlite3")
-            self.cursorobj = self.connection.cursor()
-        return self.cursorobj
+            self.cursor = self.connection.cursor()
+        return self.cursor
 
 
 a = Singleton()
