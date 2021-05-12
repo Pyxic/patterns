@@ -17,21 +17,21 @@ class SocialNetworkPoster(ABC):
 class FacebookPoster(SocialNetworkPoster):
 
     def __init__(self, login, password):
-        self.login = login
-        self.password = password
+        self.__login = login
+        self.__password = password
 
     def get_social_network(self):
-        return FacebookConnector(self.login, self.password)
+        return FacebookConnector(self.__login, self.__password)
 
 
 class LinkedInPoster(SocialNetworkPoster):
 
     def __init__(self, email, password):
-        self.email = email
-        self.password = password
+        self.__email = email
+        self.__password = password
 
     def get_social_network(self):
-        return LinkedInConnector(self.email, self.password)
+        return LinkedInConnector(self.__email, self.__password)
 
 
 class SocialNetworkConnector(ABC):
