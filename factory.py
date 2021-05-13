@@ -52,14 +52,14 @@ class SocialNetworkConnector(ABC):
 class FacebookConnector(SocialNetworkConnector):
 
     def __init__(self, login, password):
-        self.login = login
-        self.password = password
+        self.__login = login
+        self.__password = password
 
     def log_in(self):
-        print(f"HTTP request to log in user {self.login} with password {self.password}")
+        print(f"HTTP request to log in user {self.__login} with password {self.__password}")
 
     def log_out(self):
-        print(f"HTTP request to logout user {self.login}")
+        print(f"HTTP request to logout user {self.__login}")
 
     def create_post(self, content):
         print(f"HTTP request to create post in Facebook")
@@ -68,14 +68,14 @@ class FacebookConnector(SocialNetworkConnector):
 class LinkedInConnector(SocialNetworkConnector):
 
     def __init__(self, email, password):
-        self.email = email
-        self.password = password
+        self.__email = email
+        self.__password = password
 
     def log_in(self):
-        print(f"HTTP request to log in user {self.email} with password {self.password}")
+        print(f"HTTP request to log in user {self.__email} with password {self.__password}")
 
     def log_out(self):
-        print(f"HTTP request to logout user {self.email}")
+        print(f"HTTP request to logout user {self.__email}")
 
     def create_post(self, content):
         print(f"HTTP request to create post in LinkedIn")
