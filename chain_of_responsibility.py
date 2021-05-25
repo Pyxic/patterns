@@ -4,10 +4,9 @@ from datetime import datetime, timedelta
 
 
 class Middleware(ABC):
-
     _next = None
 
-    def link_with(self, next):
+    def link_to_next(self, next):
         self._next = next
         return next
 
@@ -20,14 +19,13 @@ class Middleware(ABC):
 class UserExistsMiddleware(Middleware):
 
     def __init__(self, server):
-        self.__server = server
+        self._server = server
 
     def check(self, email, password):
-        print(self.__server.has_email(email))
-        if not self.__server.has_email(email):
-            print("UserExistsMiddleware: This email is not registered!")
-        if not self.__server.is_valid_password(email, password):
-            print("UserExistsMiddleware: Wrong password!")
+        if not self._server.has_email(email):
+            print("Authorization: email does not exists")
+        if not self._server.has_password(email, password):
+            print("Authorization: wrong password")
             return False
         return super().check(email, password)
 
@@ -38,24 +36,23 @@ class RoleCheckMiddleware(Middleware):
         if email == 'admin@gmail.com':
             print("RoleCheckMiddleware: Hello, admin!")
             return True
-        print("RoleCheckMiddleware: Hello, user!\n")
-        return super().check(email, password)
+        print("RoleCheckMiddleware: Hello, user!")
+        return True
 
 
 class ThrottlingMiddleware(Middleware):
-
     __request_per_minute = None
     __request = 0
-    __currentTime = 0
+    __initial_time = 0
 
     def __init__(self, request_per_minute):
         self.__request_per_minute = request_per_minute
-        self.__currentTime = datetime.now()
+        self.__initial_time = datetime.now()
 
     def check(self, email, password):
-        if datetime.now() > self.__currentTime+timedelta(minutes=1):
+        if datetime.now() > self.__initial_time+timedelta(minutes=2):
             self.__request = 0
-            self.__currentTime = datetime()
+            self.__initial_time = datetime()
 
         self.__request += 1
         if self.__request > self.__request_per_minute:
@@ -66,36 +63,39 @@ class ThrottlingMiddleware(Middleware):
 
 
 class Server:
-    __users = {}
-    __middleware = None
 
-    def set_middleware(self, middleware: Middleware):
-        self.__middleware = middleware
+    _users = {}
+    _middleware = None
+
+    def set_middleware(self, middleware):
+        self._middleware = middleware
 
     def log_in(self, email, password):
-        if self.__middleware.check(email, password):
-            print("Server: Authorization has been successful!")
+        if self._middleware.check(email, password):
+            print("Authorization has been successful")
             return True
         return False
 
     def register(self, email, password):
-        self.__users[email] = password
+        self._users[email] = password
 
     def has_email(self, email):
-        return email in self.__users
+        return email in self._users
 
-    def is_valid_password(self, email, password):
-        return self.has_email(email) and self.__users[email] == password
+    def has_password(self, email, password):
+        if self.has_email(email) and self._users[email] == password:
+            return True
+        return False
 
 
 server = Server()
 server.register('admin@gmail.com', 'pass12345')
-server.register('user@gmail.com', '12345')
-middleware = ThrottlingMiddleware(2)
+server.register('some_user@gmail.com', '12345')
+middleware = ThrottlingMiddleware(4)
 user_exit_middleware = UserExistsMiddleware(server)
 role_middleware = RoleCheckMiddleware()
 
-middleware.link_with(user_exit_middleware).link_with(role_middleware)
+middleware.link_to_next(user_exit_middleware).link_to_next(role_middleware)
 
 server.set_middleware(middleware)
 
@@ -106,4 +106,3 @@ while not success:
     print("Enter your password:\n")
     password = input()
     success = server.log_in(email, password)
-

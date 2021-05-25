@@ -61,15 +61,10 @@ class Invoker:
             self._on_finish.execute()
 
 
-if __name__ == "__main__":
-    """
-    Клиентский код может параметризовать отправителя любыми командами.
-    """
+invoker = Invoker()
+invoker.set_on_start(SimpleCommand("Say Hi!"))
+receiver = Receiver()
+invoker.set_on_finish(ComplexCommand(
+    receiver, "Send email", "Save report"))
 
-    invoker = Invoker()
-    invoker.set_on_start(SimpleCommand("Say Hi!"))
-    receiver = Receiver()
-    invoker.set_on_finish(ComplexCommand(
-        receiver, "Send email", "Save report"))
-
-    invoker.do_something_important()
+invoker.do_something_important()
